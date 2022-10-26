@@ -1,0 +1,87 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "privacyidea.fullname" . }}
+  labels:
+    {{- include "privacyidea.labels" . | nindent 4 }}
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      {{- include "privacyidea.selectorLabels" . | nindent 6 }}
+  template:
+    metadata:
+      {{- with .Values.podAnnotations }}
+      annotations:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      labels:
+        {{- include "privacyidea.selectorLabels" . | nindent 8 }}
+    spec:
+      {{- with .Values.imagePullSecrets }}
+      imagePullSecrets:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      serviceAccountName: {{ include "privacyidea.serviceAccountName" . }}
+      securityContext:
+        {{- toYaml .Values.podSecurityContext | nindent 8 }}
+    {{- if not .Values.skipInitContainers }}
+      {{- if or .Values.postgresql.enabled .Values.extraInitContainers }}
+      initContainers:
+        {{- if .Values.postgresql.enabled }}
+        - name: pgchecker
+          image: "{{ .Values.pgchecker.image.repository }}:{{ .Values.pgchecker.image.tag }}"
+          imagePullPolicy: {{ .Values.pgchecker.image.pullPolicy }}
+          securityContext:
+            {{- toYaml .Values.pgchecker.securityContext | nindent 12 }}
+          command:
+            - sh
+            - -c
+            - |
+              echo 'Waiting for PostgreSQL to become ready...'
+
+              until printf "." && nc -z -w 2 {{ include "privacyidea.postgresql.fullname" . }} {{ .Values.postgresql.service.port }}; do
+                  sleep 2;
+              done;
+
+              echo 'PostgreSQL OK ✓'
+          resources:
+            {{- toYaml .Values.pgchecker.resources | nindent 12 }}
+        {{- end }}
+        {{- with .Values.extraInitContainers }}
+        {{- tpl . $ | nindent 8 }}
+        {{- end }}
+      {{- end }}
+    {{- end }}
+      containers:
+        - name: {{ .Chart.Name }}
+          securityContext:
+            {{- toYaml .Values.securityContext | nindent 12 }}
+          image: "{{ .Values.image.repository }}:{{ .Values.image.tag | default .Chart.AppVersion }}"
+          imagePullPolicy: {{ .Values.image.pullPolicy }}
+          ports:
+            - name: pihttp 
+              containerPort: 3031
+              protocol: TCP
+          livenessProbe:
+            httpGet:
+              path: /
+              port: pihttp
+          readinessProbe:
+            httpGet:
+              path: /
+              port: pihttp
+          resources:
+            {{- toYaml .Values.resources | nindent 12 }}
+      {{- with .Values.nodeSelector }}
+      nodeSelector:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.affinity }}
+      affinity:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.tolerations }}
+      tolerations:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}

@@ -1,0 +1,36 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ include "privacyidea.fullname" . }}
+  labels:
+    {{- include "privacyidea.labels" . | nindent 4 }}
+data:
+  pi.cfg: |
+    # The realm, where users are allowed to login as administrators
+    SUPERUSER_REALM = ['super', 'administrators']
+    # Your database
+    SQLALCHEMY_DATABASE_URI = "postgresql+psycopg2://{{ .Values.config.db.username}}:{{ .Values.config.db.password }}@{{ .Values.config.db.host }}:5432/{{ .Values.config.db.dbname }}"
+    SQLALCHEMY_ENGINE_OPTIONS = {
+        "pool_pre_ping": True,
+        "pool_recycle": 300,
+    }
+    # This is used to encrypt the auth_token
+    SECRET_KEY = {{ .Values.config.secretKey | quote }}
+    # This is used to encrypt the admin passwords
+    PI_PEPPER = ""
+    # This is used to encrypt the token data and token passwords
+    PI_ENCFILE = '/opt/privacyidea/app/enckey'
+    # This is used to sign the audit log
+    PI_AUDIT_KEY_PRIVATE = '/opt/privacyidea/app/ssl/private.pem'
+    PI_AUDIT_KEY_PUBLIC = '/opt/privacyidea/app/ssl/public.pem'
+    PI_AUDIT_SERVERNAME = 'dev-privacyidea.desy.de'
+    # PI_AUDIT_MODULE = <python audit module>
+    # PI_AUDIT_SQL_URI = <special audit log DB uri>
+    # Truncate Audit entries to fit into DB columns
+    PI_AUDIT_SQL_TRUNCATE = True
+    # PI_LOGFILE = '....'
+    # PI_LOGLEVEL = 20
+    # PI_INIT_CHECK_HOOK = 'your.module.function'
+    # PI_CSS = '/location/of/theme.css'
+    # PI_UI_DEACTIVATED = False
+    
