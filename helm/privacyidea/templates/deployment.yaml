@@ -18,6 +18,8 @@ spec:
       labels:
         {{- include "privacyidea.selectorLabels" . | nindent 8 }}
     spec:
+      strategy:
+        type: {{ .Values.strategy.type }}
       {{- with .Values.imagePullSecrets }}
       imagePullSecrets:
         {{- toYaml . | nindent 8 }}

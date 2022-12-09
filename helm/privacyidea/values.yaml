@@ -41,6 +41,9 @@ service:
   type: ClusterIP
   port: 3031
 
+strategy:
+  type: RollingUpdate
+
 ingress:
   enabled: false
   className: nginx
