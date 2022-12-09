@@ -19,8 +19,3 @@ package_chart:
     - helm repo update
     - helm dependency build helm/privacyidea
     - helm cm-push helm/privacyidea/ desy-it
-  rules:
-    - when: always
-      changes:
-        - helm/privacyidea
-        - .gitlab-ci.yml
