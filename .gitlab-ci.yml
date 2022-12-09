@@ -1,0 +1,23 @@
+stages:
+  - package
+
+default:
+  tags:
+    - kubernetes
+
+variables:
+  HELM_REPO_USERNAME: $HELM_REPO_USERNAME
+  HELM_REPO_PASSWORD: $HELM_REPO_PASSWORD
+
+package_chart:
+  stage: package
+  image: alpine/helm:3.9.2
+  script:
+    - helm plugin install https://github.com/chartmuseum/helm-push.git
+    - helm repo add desy-it https://charts.desy.de/desy-it
+    - helm cm-push helm/echo-server/ desy-it
+  rules:
+    - when: always
+      changes:
+        - helm/privacyidea
+        - .gitlab-ci.yml
