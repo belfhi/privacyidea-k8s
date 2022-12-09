@@ -15,7 +15,7 @@ package_chart:
   script:
     - helm plugin install https://github.com/chartmuseum/helm-push.git
     - helm repo add desy-it https://charts.desy.de/desy-it
-    - helm dependency build
+    - helm dependency build helm/privacyidea
     - helm cm-push helm/privacyidea/ desy-it
   rules:
     - when: always
