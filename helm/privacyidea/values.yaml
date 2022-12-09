@@ -51,6 +51,7 @@ ingress:
     - host: privacy.chart-example.local
       paths:
       - path: /
+        pathType: ImplementationSpecific
   tls: []
   #  - secretName: chart-example-tls
   #    hosts:
