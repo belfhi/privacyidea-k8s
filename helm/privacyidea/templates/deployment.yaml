@@ -47,7 +47,9 @@ spec:
         {{- end }}
         - name: {{ .Chart.Name }}-init
           image: "{{ .Values.initImage.repository }}:{{ .Values.initImage.tag | default .Chart.AppVersion }}"
-          command: "/bin/bash /etc/privacyidea/config/init.sh"
+          command: 
+            - /bin/bash 
+            - /etc/privacyidea/config/init.sh
           volumeMounts:
             - name: config-volume
               mountPath: "/etc/privacyidea/config/"
