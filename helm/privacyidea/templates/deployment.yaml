@@ -9,6 +9,8 @@ spec:
   selector:
     matchLabels:
       {{- include "privacyidea.selectorLabels" . | nindent 6 }}
+  strategy:
+    type: {{ .Values.strategy.type }}
   template:
     metadata:
       {{- with .Values.podAnnotations }}
@@ -18,8 +20,6 @@ spec:
       labels:
         {{- include "privacyidea.selectorLabels" . | nindent 8 }}
     spec:
-      strategy:
-        type: {{ .Values.strategy.type }}
       {{- with .Values.imagePullSecrets }}
       imagePullSecrets:
         {{- toYaml . | nindent 8 }}
