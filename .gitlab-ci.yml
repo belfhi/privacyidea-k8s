@@ -15,6 +15,8 @@ package_chart:
   script:
     - helm plugin install https://github.com/chartmuseum/helm-push.git
     - helm repo add desy-it https://charts.desy.de/desy-it
+    - helm repo add bitnami https://charts.bitnami.com/bitnami
+    - helm repo update
     - helm dependency build helm/privacyidea
     - helm cm-push helm/privacyidea/ desy-it
   rules:
