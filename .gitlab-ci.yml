@@ -11,11 +11,11 @@ variables:
 
 package_chart:
   stage: package
-  image: alpine/helm:3.9.2
+  image: alpine/helm:3.10.2
   script:
     - helm plugin install https://github.com/chartmuseum/helm-push.git
     - helm repo add desy-it https://charts.desy.de/desy-it
-    - helm cm-push helm/echo-server/ desy-it
+    - helm cm-push helm/privacyidea/ desy-it
   rules:
     - when: always
       changes:
