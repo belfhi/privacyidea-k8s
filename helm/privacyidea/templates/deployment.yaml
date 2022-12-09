@@ -26,7 +26,6 @@ spec:
       securityContext:
         {{- toYaml .Values.podSecurityContext | nindent 8 }}
     {{- if not .Values.skipInitContainers }}
-      {{- if or .Values.postgresql.enabled .Values.extraInitContainers }}
       initContainers:
         {{- if .Values.postgresql.enabled }}
         - name: pgchecker
@@ -39,19 +38,42 @@ spec:
             - -c
             - |
               echo 'Waiting for PostgreSQL to become ready...'
-
               until printf "." && nc -z -w 2 {{ include "privacyidea.postgresql.fullname" . }} {{ .Values.postgresql.service.port }}; do
                   sleep 2;
               done;
-
               echo 'PostgreSQL OK ✓'
           resources:
             {{- toYaml .Values.pgchecker.resources | nindent 12 }}
         {{- end }}
+        - name: {{ .Chart.Name }}-init
+          image: "{{ .Values.initImage.repository }}:{{ .Values.initImage.tag | default .Chart.AppVersion }}"
+          command: "/bin/bash /etc/privacyidea/config/init.sh"
+          volumeMounts:
+            - name: config-volume
+              mountPath: "/etc/privacyidea/config/"
+            - name: key-volume
+              mountPath: "/etc/privacyidea/secrets/"
+          env:
+          - name: PRIVACYIDEA_CONFIGFILE
+            value: /etc/privacyidea-config/pi.cfg
+          - name: DB_CONN
+            value: {{ include "privacyidea.sqlstring" . | quote }}
+          - name: DB_HOST
+            valueFrom: { secretKeyRef: { name: {{ include "privacyidea.dbsecret" .}}, key: host } }
+          - name: DB_PORT
+            valueFrom: { secretKeyRef: { name: {{ include "privacyidea.dbsecret" .}}, key: port } }
+          - name: DB_NAME
+            valueFrom: { secretKeyRef: { name: {{ include "privacyidea.dbsecret" .}}, key: dbname } }
+          - name: DB_USER
+            valueFrom: { secretKeyRef: { name: {{ include "privacyidea.dbsecret" .}}, key: user } }
+          - name: DB_PASS
+            valueFrom: { secretKeyRef: { name: {{ include "privacyidea.dbsecret" .}}, key: password } }
+          envFrom:
+          - secretRef:
+              name: {{ include "privacyidea.adminsecret" . }}
         {{- with .Values.extraInitContainers }}
         {{- tpl . $ | nindent 8 }}
         {{- end }}
-      {{- end }}
     {{- end }}
       containers:
         - name: {{ .Chart.Name }}
@@ -59,18 +81,49 @@ spec:
             {{- toYaml .Values.securityContext | nindent 12 }}
           image: "{{ .Values.image.repository }}:{{ .Values.image.tag | default .Chart.AppVersion }}"
           imagePullPolicy: {{ .Values.image.pullPolicy }}
+          volumeMounts:
+          - name: config-volume
+            mountPath: "/etc/privacyidea/config"
+          - name: key-volume
+            mountPath: "/etc/privacyidea/secrets"
+          env:
+            - name: PRIVACYIDEA_CONFIGFILE
+              value: /etc/privacyidea/config/pi.cfg
+            - name: DB_CONN
+              value: {{ include "privacyidea.sqlstring" .}}
+            - name: DB_HOST
+              valueFrom: { secretKeyRef: { name: {{ include "privacyidea.dbsecret" .}}, key: host } }
+            - name: DB_PORT
+              valueFrom: { secretKeyRef: { name: {{ include "privacyidea.dbsecret" .}}, key: port } }
+            - name: DB_NAME
+              valueFrom: { secretKeyRef: { name: {{ include "privacyidea.dbsecret" .}}, key: dbname } }
+            - name: DB_USER
+              valueFrom: { secretKeyRef: { name: {{ include "privacyidea.dbsecret" .}}, key: user } }
+            - name: DB_PASS
+              valueFrom: { secretKeyRef: { name: {{ include "privacyidea.dbsecret" .}}, key: password } }
+      volumes:
+        - name: config-volume
+          configMap:
+            name: {{ include "privacyidea.fullname" .}}-config
+        - name: key-volume
+          persistentVolumeClaim:
+          {{- if .Values.privacyidea.persistence.existingClaim }}
+            claimName: {{ .Values.privacyidea.persistence.existingClaim }}
+          {{- else}}
+            claimName: {{ include "privacyidea.fullname" .}}-pvc
+          {{- end }}
           ports:
-            - name: pihttp 
+            - name: wsgi
               containerPort: 3031
               protocol: TCP
           livenessProbe:
             httpGet:
               path: /
-              port: pihttp
+              port: wsgi
           readinessProbe:
             httpGet:
               path: /
-              port: pihttp
+              port: wsgi
           resources:
             {{- toYaml .Values.resources | nindent 12 }}
       {{- with .Values.nodeSelector }}

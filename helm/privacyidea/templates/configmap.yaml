@@ -1,29 +1,30 @@
 apiVersion: v1
 kind: ConfigMap
 metadata:
-  name: {{ include "privacyidea.fullname" . }}
+  name: {{ include "privacyidea.fullname" . }}-privacyidea
   labels:
     {{- include "privacyidea.labels" . | nindent 4 }}
 data:
   pi.cfg: |
+    from os import environ
     # The realm, where users are allowed to login as administrators
     SUPERUSER_REALM = ['super', 'administrators']
     # Your database
-    SQLALCHEMY_DATABASE_URI = "postgresql+psycopg2://{{ .Values.config.db.username}}:{{ .Values.config.db.password }}@{{ .Values.config.db.host }}:5432/{{ .Values.config.db.dbname }}"
+    SQLALCHEMY_DATABASE_URI = f'{environ["DB_CONN"]}://{environ["DB_USER"]}:{environ["DB_PASS"]}@{environ["DB_HOST"]}:{environ["DB_PORT"]}/{environ["DB_NAME"]}'
     SQLALCHEMY_ENGINE_OPTIONS = {
         "pool_pre_ping": True,
         "pool_recycle": 300,
     }
     # This is used to encrypt the auth_token
-    SECRET_KEY = {{ .Values.config.secretKey | quote }}
+    SECRET_KEY = {{ .Values.privacyidea.secretKey | quote }}
     # This is used to encrypt the admin passwords
-    PI_PEPPER = ""
+    PI_PEPPER = {{ .Values.privacyidea.pepper | quote }}
     # This is used to encrypt the token data and token passwords
-    PI_ENCFILE = '/opt/privacyidea/app/enckey'
+    PI_ENCFILE = '/etc/privacyidea/secrets/enckey'
     # This is used to sign the audit log
-    PI_AUDIT_KEY_PRIVATE = '/opt/privacyidea/app/ssl/private.pem'
-    PI_AUDIT_KEY_PUBLIC = '/opt/privacyidea/app/ssl/public.pem'
-    PI_AUDIT_SERVERNAME = 'dev-privacyidea.desy.de'
+    PI_AUDIT_KEY_PRIVATE = '/etc/privacyidea/secrets/private.pem'
+    PI_AUDIT_KEY_PUBLIC = '/etc/privacyidea/secrets/public.pem'
+    PI_AUDIT_SERVERNAME = {{ .Values.privacyidea.host | quote }}
     # PI_AUDIT_MODULE = <python audit module>
     # PI_AUDIT_SQL_URI = <special audit log DB uri>
     # Truncate Audit entries to fit into DB columns
@@ -33,4 +34,8 @@ data:
     # PI_INIT_CHECK_HOOK = 'your.module.function'
     # PI_CSS = '/location/of/theme.css'
     # PI_UI_DEACTIVATED = False
-    
+  init.sh: |
+    pi-manage createdb
+    pi-manage create_enckey
+    pi-manage create_audit_keys
+    pi-manage admin add ${PRIVACYIDEA_ADMIN_USER} --password=${PRIVACYIDEA_ADMIN_PASSWORD}

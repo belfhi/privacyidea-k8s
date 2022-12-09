@@ -60,3 +60,45 @@ Create the name of the service account to use
 {{- default "default" .Values.serviceAccount.name }}
 {{- end }}
 {{- end }}
+
+
+{{/*
+Create a default fully qualified app name for the postgres requirement.
+*/}}
+{{- define "privacyidea.postgresql.fullname" -}}
+{{- $postgresContext := dict "Values" .Values.postgresql "Release" .Release "Chart" (dict "Name" "postgresql") -}}
+{{ include "privacyidea.fullname" .}}-{{ include "postgresql.name" $postgresContext }}
+{{- end }}
+
+{{/*
+Define the PSQL connection string depending on wether included db is used or not
+*/}}
+{{- define "privacyidea.sqlstring" -}}
+{{- if or .Values.postgresql.enabled  (eq .Values.privacyidea.database.type "postgresql" ) }}
+{{- print "postgresql+psychopg2" -}}
+{{- else }}
+{{- print "mysql+pymysql" -}}
+{{- end }}
+{{- end }}
+
+{{/*
+define DB Secret string
+*/}}
+{{- define "privacyidea.dbsecret" -}}
+{{- if .Values.privacyidea.database.existingSecret }}
+{{- .Values.privacyidea.database.existingSecret  }}
+{{- else }}
+{{- printf "%s-%s" (include  "privacyidea.fullname" .) "dbsecret"  }}
+{{- end }}
+{{- end}}
+
+{{/* 
+define sting for admin username / ps secret
+*/}}
+{{- define "privacyidea.adminsecret" -}}
+{{- if .Values.privacyidea.admin.existingSecret }}
+{{- print .Values.privacyidea.admin.existingSecret }}
+{{- else }}
+{{- printf "%s-%s" (include "privacyidea.fullname" .) "admin-config" }}
+{{- end }}
+{{- end }}
