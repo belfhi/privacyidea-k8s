@@ -75,7 +75,7 @@ Define the PSQL connection string depending on wether included db is used or not
 */}}
 {{- define "privacyidea.sqlstring" -}}
 {{- if or .Values.postgresql.enabled  (eq .Values.privacyidea.database.type "postgresql" ) }}
-{{- print "postgresql+psychopg2" -}}
+{{- print "postgresql+psycopg2" -}}
 {{- else }}
 {{- print "mysql+pymysql" -}}
 {{- end }}
