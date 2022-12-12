@@ -79,6 +79,7 @@ privacyidea:
     storageClass: "-"
     size: 1G
     existingClaim:
+  logLevel:
 
 extraVolumes: ""
 

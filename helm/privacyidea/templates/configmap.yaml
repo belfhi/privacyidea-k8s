@@ -30,7 +30,7 @@ data:
     # Truncate Audit entries to fit into DB columns
     PI_AUDIT_SQL_TRUNCATE = True
     # PI_LOGFILE = '....'
-    # PI_LOGLEVEL = 20
+    PI_LOGLEVEL = {{ .Values.privacyidea.logLevel | default 20 }}
     # PI_INIT_CHECK_HOOK = 'your.module.function'
     # PI_CSS = '/location/of/theme.css'
     {{- if .Values.privacyidea.customization.logoPath }}
