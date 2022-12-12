@@ -106,17 +106,17 @@ spec:
             - name: DB_PASS
               valueFrom: { secretKeyRef: { name: {{ include "privacyidea.dbsecret" .}}, key: password } }
           ports:
-            - name: wsgi
-              containerPort: 3031
+            - name: http
+              containerPort: 8080
               protocol: TCP
           livenessProbe:
             httpGet:
               path: /
-              port: wsgi
+              port: http
           readinessProbe:
             httpGet:
               path: /
-              port: wsgi
+              port: http
           resources:
             {{- toYaml .Values.resources | nindent 12 }}
       volumes:

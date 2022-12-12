@@ -8,8 +8,8 @@ spec:
   type: {{ .Values.service.type }}
   ports:
     - port: {{ .Values.service.port }}
-      targetPort: wsgi
+      targetPort: http
       protocol: TCP
-      name: wsgi
+      name: http
   selector:
     {{- include "privacyidea.selectorLabels" . | nindent 4 }}

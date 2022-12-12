@@ -39,7 +39,7 @@ securityContext:
 
 service:
   type: ClusterIP
-  port: 3031
+  port: 8080
 
 strategy:
   type: RollingUpdate
