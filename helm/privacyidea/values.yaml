@@ -80,6 +80,10 @@ privacyidea:
     size: 1G
     existingClaim:
 
+extraVolumes: ""
+
+extraVolumeMounts: ""
+
 postgresql:
   # If `true`, the Postgresql dependency is enabled
   enabled: true

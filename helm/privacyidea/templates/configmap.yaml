@@ -34,7 +34,7 @@ data:
     # PI_INIT_CHECK_HOOK = 'your.module.function'
     # PI_CSS = '/location/of/theme.css'
     {{- if .Values.privacyidea.customization.logoPath }}
-    PI_LOGO = {{ .Values.privacyidea.customization.logoPath }}
+    PI_LOGO = {{ .Values.privacyidea.customization.logoPath | quote }}
     {{- end }}
     # PI_UI_DEACTIVATED = False
   init.sh: |
