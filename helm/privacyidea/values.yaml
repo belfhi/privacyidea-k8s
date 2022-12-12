@@ -72,6 +72,8 @@ privacyidea:
     existingSecret:
   secretKey:
   pepper:
+  customization:
+    logoPath: 
   persistence:
     enabled: true
     storageClass: "-"
