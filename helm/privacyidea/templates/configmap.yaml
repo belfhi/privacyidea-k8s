@@ -8,7 +8,7 @@ data:
   pi.cfg: |
     from os import environ
     # The realm, where users are allowed to login as administrators
-    SUPERUSER_REALM = ['super', 'administrators']
+    SUPERUSER_REALM = {{ .Values.privacyidea.adminRealms | toJson }}
     # Your database
     SQLALCHEMY_DATABASE_URI = f'{environ["DB_CONN"]}://{environ["DB_USER"]}:{environ["DB_PASS"]}@{environ["DB_HOST"]}:{environ["DB_PORT"]}/{environ["DB_NAME"]}'
     SQLALCHEMY_ENGINE_OPTIONS = {

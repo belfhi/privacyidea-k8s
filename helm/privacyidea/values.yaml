@@ -80,6 +80,9 @@ privacyidea:
     size: 1G
     existingClaim:
   logLevel:
+  adminRealms:
+    - super
+    - administrator
 
 extraVolumes: ""
 
