@@ -67,7 +67,7 @@ Create a default fully qualified app name for the postgres requirement.
 */}}
 {{- define "privacyidea.postgresql.fullname" -}}
 {{- $postgresContext := dict "Values" .Values.postgresql "Release" .Release "Chart" (dict "Name" "postgresql") -}}
-{{ include "privacyidea.fullname" .}}-{{ include "postgresql.name" $postgresContext }}
+{{ include "privacyidea.fullname" .}}-postgresql
 {{- end }}
 
 {{/*

@@ -40,7 +40,7 @@ spec:
             - -c
             - |
               echo 'Waiting for PostgreSQL to become ready...'
-              until printf "." && nc -z -w 2 {{ include "privacyidea.postgresql.fullname" . }} {{ .Values.postgresql.service.port }}; do
+              until printf "." && nc -z -w 2 {{ include "privacyidea.postgresql.fullname" . }} {{ .Values.postgresql.service.ports.postgresql }}; do
                   sleep 2;
               done;
               echo 'PostgreSQL OK ✓'
