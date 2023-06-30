@@ -61,6 +61,12 @@ ingress:
   #      - chart-example.local
 
 privacyidea:
+  initialSetup:
+    enabled: true
+    existingSecret:
+    csi:
+      driver:
+      volumeAttributes:
   host: privacy.chart-example.local
   database:
     external:
