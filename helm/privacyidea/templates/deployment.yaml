@@ -13,8 +13,9 @@ spec:
     type: {{ .Values.strategy.type }}
   template:
     metadata:
-      {{- with .Values.podAnnotations }}
       annotations:
+        checksum/config: {{ include (print $.Template.BasePath "/configmap.yaml") . | sha256sum }}
+      {{- with .Values.podAnnotations }}
         {{- toYaml . | nindent 8 }}
       {{- end }}
       labels:
@@ -98,16 +99,17 @@ spec:
               value: /etc/privacyidea/config/pi.cfg
             - name: DB_CONN
               value: {{ include "privacyidea.sqlstring" .}}
-            - name: DB_HOST
-              valueFrom: { secretKeyRef: { name: {{ include "privacyidea.dbsecret" .}}, key: host } }
-            - name: DB_PORT
-              valueFrom: { secretKeyRef: { name: {{ include "privacyidea.dbsecret" .}}, key: port } }
-            - name: DB_NAME
-              valueFrom: { secretKeyRef: { name: {{ include "privacyidea.dbsecret" .}}, key: dbname } }
-            - name: DB_USER
-              valueFrom: { secretKeyRef: { name: {{ include "privacyidea.dbsecret" .}}, key: user } }
-            - name: DB_PASS
-              valueFrom: { secretKeyRef: { name: {{ include "privacyidea.dbsecret" .}}, key: password } }
+          {{- with .Values.extraEnv }}
+          {{- tpl . $ | nindent 12 }}
+          {{- end }}
+          envFrom:
+          {{- if .Values.postgresql.enabled }}
+            - secretRef:
+                name:  {{ include "privacyidea.dbsecret" . }}
+          {{- end }}
+          {{- with .Values.extraEnvFrom }}
+          {{- tpl . $ | nindent 12 }}
+          {{- end }}
           ports:
             - name: http
               containerPort: 8080

@@ -86,6 +86,10 @@ privacyidea:
 
 extraVolumes: ""
 
+extraEnv: ""
+
+extraEnvFrom: ""
+
 extraVolumeMounts: ""
 
 postgresql:
