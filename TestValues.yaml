@@ -1,1 +1,4 @@
 postgresql.enabled: true
+privacyidea:
+  persistence:
+    enabled: false

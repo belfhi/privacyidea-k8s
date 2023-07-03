@@ -5,7 +5,7 @@ metadata:
   labels:
     {{- include "privacyidea.labels" . | nindent 4 }}
 spec:
-  replicas: 1
+  replicas: {{ .Values.replicaCount }}
   selector:
     matchLabels:
       {{- include "privacyidea.selectorLabels" . | nindent 6 }}
@@ -48,6 +48,7 @@ spec:
           resources:
             {{- toYaml .Values.pgchecker.resources | nindent 12 }}
         {{- end }}
+        {{- if .Values.privacyidea.initialSetup.enabled }}
         - name: {{ .Chart.Name }}-init
           image: "{{ .Values.initImage.repository }}:{{ .Values.initImage.tag | default .Chart.AppVersion }}"
           command: 
@@ -76,8 +77,9 @@ spec:
           envFrom:
           - secretRef:
               name: {{ include "privacyidea.adminsecret" . }}
+        {{- end }}
         {{- with .Values.extraInitContainers }}
-        {{- tpl . $ | nindent 8 }}
+        {{- tpl "toYaml"  $ | nindent 8 }}
         {{- end }}
     {{- end }}
       containers:
@@ -91,6 +93,9 @@ spec:
             mountPath: "/etc/privacyidea/config"
           - name: key-volume
             mountPath: "/etc/privacyidea/secrets"
+            {{- if not .Values.privacyidea.initialSetup.enabled }}
+            readOnly: true
+            {{- end }}
           {{- with .Values.extraVolumeMounts }}
           {{- tpl . $ | nindent 10 }}
           {{- end }}
@@ -129,12 +134,31 @@ spec:
           configMap:
             name: {{ include "privacyidea.fullname" .}}-config
         - name: key-volume
+        {{- if .Values.privacyidea.initialSetup.enabled }}
+          {{- if  .Values.privacyidea.persistence.enabled }}
           persistentVolumeClaim:
-          {{- if .Values.privacyidea.persistence.existingClaim }}
+            {{- if .Values.privacyidea.persistence.existingClaim }}
             claimName: {{ .Values.privacyidea.persistence.existingClaim }}
-          {{- else}}
+            {{- else}}
             claimName: {{ include "privacyidea.fullname" .}}-pvc
+            {{- end }}
+          {{- else }}
+          emptyDir:
+            sizeLimit: 1Gi
           {{- end }}
+        {{- else if .Values.privacyidea.initialSetup.existingSecret }}
+          secret:
+            secretName: {{ .Values.privacyidea.initialSetup.existingSecret }}
+            optional: false
+        {{- else if .Values.privacyidea.initialSetup.csiVolume.enabled }}
+          csi:
+            driver: {{ .Values.privacyidea.initialSetup.csiVolume.driver }}
+            readOnly: {{ .Values.privacyidea.initialSetup.csiVolume.readOnly }}
+            volumeAttributes:
+            {{- with .Values.privacyidea.initialSetup.csiVolume.volumeAttributes }}
+              {{- toYaml . | nindent 14 }}
+            {{- end }}
+        {{- end }}
         {{- with .Values.extraVolumes }}
         {{- tpl . $ | nindent 8 }}
         {{- end }}
