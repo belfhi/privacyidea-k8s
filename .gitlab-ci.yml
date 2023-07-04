@@ -22,7 +22,7 @@ test_chart:
 
 package_chart:
   only:
-    - main
+    - tags
   stage: package
   script:
     - helm plugin install https://github.com/chartmuseum/helm-push.git
@@ -30,4 +30,4 @@ package_chart:
     - helm repo add bitnami https://charts.bitnami.com/bitnami
     - helm repo update
     - helm dependency build helm/privacyidea
-    - helm cm-push helm/privacyidea/ desy-it
+    - helm cm-push --version $CI_COMMIT_TAG helm/privacyidea/ desy-it
