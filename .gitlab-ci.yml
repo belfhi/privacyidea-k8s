@@ -14,6 +14,10 @@ variables:
 test_chart:
   stage: test
   script:
+    - helm repo add desy-it https://charts.desy.de/desy-it
+    - helm repo add bitnami https://charts.bitnami.com/bitnami
+    - helm repo update
+    - helm dependency build helm/privacyidea
     - helm lint helm/privacyidea --values TestValues.yaml
 
 package_chart:
