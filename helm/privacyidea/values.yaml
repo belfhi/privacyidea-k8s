@@ -5,12 +5,12 @@
 replicaCount: 1
 
 image:
-  repository: gitlab.desy.de:5555/it-infa/multifactor/privacyidea-docker
+  repository: docker pull ghcr.io/belfhi/privacyidea-docker
   pullPolicy: IfNotPresent
   # Overrides the image tag whose default is the chart appVersion.
   tag: ""
 initImage:
-  repository: gitlab.desy.de:5555/it-infa/multifactor/privacyidea-docker
+  repository: docker pull ghcr.io/belfhi/privacyidea-docker
   pullPolicy: IfNotPresent
   # Overrides the image tag whose default is the chart appVersion.
   tag: ""
